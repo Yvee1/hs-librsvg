@@ -3,3 +3,5 @@ dist*
 cabal.project.local
 *.sw?
 result*
+.stack-work
+hs-librsvg.cabal
