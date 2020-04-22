@@ -3,14 +3,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-module Graphics.Rendering.Cairo.LibRSvg.Context (Svg(..), Cairo, unCairo, rsvgCtx) where
+module GI.Cairo.Render.LibRSvg.Context (Svg(..), Cairo, unCairo, rsvgCtx) where
 
 import Data.Monoid (mempty, (<>))
 import qualified Language.C.Inline as C
 import           Language.C.Inline.Context
 import qualified Language.C.Types as C
 import Foreign.ForeignPtr
-import Graphics.Rendering.Cairo.Types
+import GI.Cairo.Render.Types
 
 newtype Svg = Svg (ForeignPtr Svg)
   deriving (Eq, Show)

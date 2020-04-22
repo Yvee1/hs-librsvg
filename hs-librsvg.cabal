@@ -18,14 +18,15 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:
-    Graphics.Rendering.Cairo.LibRSvg
-    Graphics.Rendering.Cairo.LibRSvg.Context
+    GI.Cairo.Render.LibRSvg
+    GI.Cairo.Render.LibRSvg.Context
   build-depends:
     base >=4.10 && <5,
     inline-c >=0.6 && <0.7,
     template-haskell,
     bytestring,
-    cairo,
+    gi-cairo-render,
+    haskell-gi-base,
     protolude
   ghc-options: -Wall
   pkgconfig-depends: librsvg-2.0

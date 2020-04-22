@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE ViewPatterns #-}
-module Graphics.Rendering.Cairo.LibRSvg (
+module GI.Cairo.Render.LibRSvg (
   Svg
 , dimensions
 , fromBuffer
@@ -15,10 +15,12 @@ module Graphics.Rendering.Cairo.LibRSvg (
 import Data.ByteString (useAsCString)
 import Data.ByteString.Internal
 import Data.ByteString.Unsafe (unsafeUseAsCStringLen, unsafePackMallocCString)
-import Graphics.Rendering.Cairo
-import Graphics.Rendering.Cairo.LibRSvg.Context
+import Data.GI.Base (ManagedPtr(..))
+import GI.Cairo.Render
+import GI.Cairo.Render.LibRSvg.Context
 import Foreign.Ptr
 import Foreign.ForeignPtr
+import Foreign.ForeignPtr.Unsafe
 import Protolude
 
 import qualified Language.C.Inline as C
@@ -30,17 +32,25 @@ C.include "<librsvg/rsvg.h>"
 
 render :: Svg -> Render Bool
 render svg = do
-  cairo <- asks unCairo
-  toEnum . fromIntegral <$> liftIO [C.exp|int {
-  rsvg_handle_render_cairo($fptr-ptr:(RsvgHandle *svg), $(cairo_t *cairo))
-  }|]
+  cairoManagedPtr <- asks unCairo
+  let cairoForeignPtr = managedForeignPtr cairoManagedPtr
+  let cairo = unsafeForeignPtrToPtr cairoForeignPtr
+  result <- toEnum . fromIntegral <$> liftIO [C.exp|int {
+               rsvg_handle_render_cairo($fptr-ptr:(RsvgHandle *svg), $(cairo_t *cairo))
+               }|]
+  liftIO $ touchForeignPtr cairoForeignPtr
+  return result
 
 renderSub :: Svg -> ByteString -> Render Bool
 renderSub svg id = do
-  cairo <- asks unCairo
-  toEnum . fromIntegral <$> liftIO (useAsCString id $ \id_ -> [C.exp|int {
-  rsvg_handle_render_cairo_sub($fptr-ptr:(RsvgHandle *svg), $(cairo_t *cairo), $(char *id_))
-  }|])
+  cairoManagedPtr <- asks unCairo
+  let cairoForeignPtr = managedForeignPtr cairoManagedPtr
+  let cairo = unsafeForeignPtrToPtr cairoForeignPtr
+  result <- toEnum . fromIntegral <$> liftIO (useAsCString id $ \id_ -> [C.exp|int {
+            rsvg_handle_render_cairo_sub($fptr-ptr:(RsvgHandle *svg), $(cairo_t *cairo), $(char *id_))
+            }|])
+  liftIO $ touchForeignPtr cairoForeignPtr
+  return result
 
 fromBuffer :: ByteString -> IO (Either Text Svg)
 fromBuffer bs = unsafeUseAsCStringLen bs $ \(buf, fromIntegral -> len) -> do
